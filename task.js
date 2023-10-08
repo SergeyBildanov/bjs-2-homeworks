@@ -1,87 +1,47 @@
-function getArrayParams(...arr) {
-  let min = arr[0];
-  let max = arr[0];
-  let sum = 0;
-  for(let i=0; i<arr.length; i++){
-    if(arr[i] < min){
-      min = arr[i];
-    }
-    if(arr[i] > max){
-      max = arr[i];
-    }
-    sum += arr[i];
-  }
-  let avg = Number((sum/arr.length).toFixed(2));
-  return { min: min, max: max, avg: avg };
+function Student(name, gender, age) {
+    this.name = name;
+    this.gender = gender,
+    this.age = age;
+    this.marks = [];
 }
 
-function summElementsWorker(...arr) {
-  if(arr.length === 0){
+Student.prototype.setSubject = function (subjectName) {
+  this.subject = subjectName;
+}
+
+Student.prototype.addMarks = function (...marksToAdd) {
+    debugger
+  if(this.hasOwnProperty('marks')){
+    this.marks.push(...marksToAdd)
+  }
+}
+
+Student.prototype.getAverage = function () {
+  if(!this.hasOwnProperty('marks') || this.marks.length === 0){
     return 0;
   }
   let sum = 0;
-  for(let i = 0; i<arr.length; i++){
-    sum+=arr[i];
+  for(let mark of this.marks){
+    sum += mark;
   }
-  return sum;
+  return sum/this.marks.length;
 }
 
-function differenceMaxMinWorker(...arr) {
-  if(arr.length === 0){
-    return 0;
-  }
-  let min = arr[0];
-  let max = arr[0];
-  for(let i=0; i<arr.length; i++){
-    if(arr[i] < min){
-      min = arr[i];
-    }
-    if(arr[i] > max){
-      max = arr[i];
-    }
-  }
-  return max-min;
+Student.prototype.exclude = function (reason) {
+  delete this.subject;
+  delete this.marks;
+  this.excluded = reason;
 }
 
-function differenceEvenOddWorker(...arr) {
-  if(arr.length === 0){
-    return 0;
-  }
-  let sumEvenElements = 0;
-  let sumOddElements = 0;
-  for(let i=0; i<arr.length; i++){
-    if(arr[i] % 2 === 0){
-      sumEvenElements += arr[i];
-    }
-    if(arr[i] % 2 === 1){
-      sumOddElements += arr[i];
-    }
-  }
-  return (sumEvenElements - sumOddElements);
-}
-
-function averageEvenElementsWorker(...arr) {
-  if(arr.length === 0){
-    return 0;
-  }
-  let sumEvenElements = 0;
-  let countEvenElements = 0;
-  for(let i=0; i<arr.length; i++){
-    if(arr[i] % 2 === 0){
-      sumEvenElements += arr[i];
-      countEvenElements++;
-    }
-  }
-  return (sumEvenElements/countEvenElements);
-}
-
-function makeWork (arrOfArr, func) {
-  let maxWorkerResult = -Infinity;
-  for(let i=0; i < arrOfArr.length; i++){
-    let funcResult = func(...arrOfArr[i]);
-    if(funcResult > maxWorkerResult){
-      maxWorkerResult = funcResult;
-    }
-  }
-  return maxWorkerResult;
-}
+let student1 = new Student("Василиса", "женский", 19);
+student1.setSubject("Algebra");
+console.log(student1.getAverage()); // 0
+student1.addMarks(4, 5, 4, 5);
+console.log(student1.getAverage()); // 4.5
+console.log(student1);
+// {age: 19, gender: "женский", marks: [4, 5, 4, 5], name: "Василиса", subject: "Algebra"}
+let student2 = new Student("Артём", "мужской", 25);
+student2.setSubject("Geometry");
+student2.exclude('плохая учёба')
+console.log(student2)
+// {name: "Артём", gender: "мужской", age: 25, excluded: "плохая учёба"}
