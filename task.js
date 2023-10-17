@@ -1,47 +1,101 @@
-function Student(name, gender, age) {
-    this.name = name;
-    this.gender = gender,
-    this.age = age;
-    this.marks = [];
+class PrintEditionItem {
+    constructor(name, releaseDate, pagesCount){
+        this.name = name;
+        this.releaseDate = releaseDate;
+        this.pagesCount = pagesCount;
+        this._state = 100;
+        this.type = null;
+    }
+    set state(st){
+        if(st < 0){
+            st = 0;
+        }
+        if(st > 100){
+            st = 100;
+        }
+        this._state = st;
+    }
+    get state(){
+        return this._state;
+    }
+    fix(){
+        this.state = this._state*1.5;
+    }
 }
 
-Student.prototype.setSubject = function (subjectName) {
-  this.subject = subjectName;
+class Magazine extends PrintEditionItem{
+    constructor(name, releaseDate, pagesCount){
+        super(name. releaseDate, pagesCount);
+        this.type = "magazine";
+    }
 }
 
-Student.prototype.addMarks = function (...marksToAdd) {
-    debugger
-  if(this.hasOwnProperty('marks')){
-    this.marks.push(...marksToAdd)
-  }
+class Book extends PrintEditionItem{
+    constructor(author, name, releaseDate, pagesCount){
+        super(name, releaseDate, pagesCount);
+        this.author = author;
+        this.type = "book";
+    }
 }
 
-Student.prototype.getAverage = function () {
-  if(!this.hasOwnProperty('marks') || this.marks.length === 0){
-    return 0;
-  }
-  let sum = 0;
-  for(let mark of this.marks){
-    sum += mark;
-  }
-  return sum/this.marks.length;
+class NovelBook extends Book{
+    constructor(author, name, releaseDate, pagesCount){
+        super(author, name, releaseDate, pagesCount);
+        this.type = "novel";
+    }
 }
 
-Student.prototype.exclude = function (reason) {
-  delete this.subject;
-  delete this.marks;
-  this.excluded = reason;
+class FantasticBook extends Book{
+    constructor(author, name, releaseDate, pagesCount){
+        super(author, name, releaseDate, pagesCount);
+        this.type = "fantastic";
+    }
 }
 
-let student1 = new Student("Василиса", "женский", 19);
-student1.setSubject("Algebra");
-console.log(student1.getAverage()); // 0
-student1.addMarks(4, 5, 4, 5);
-console.log(student1.getAverage()); // 4.5
-console.log(student1);
-// {age: 19, gender: "женский", marks: [4, 5, 4, 5], name: "Василиса", subject: "Algebra"}
-let student2 = new Student("Артём", "мужской", 25);
-student2.setSubject("Geometry");
-student2.exclude('плохая учёба')
-console.log(student2)
-// {name: "Артём", gender: "мужской", age: 25, excluded: "плохая учёба"}
+class DetectiveBook extends Book{
+    constructor(author, name, releaseDate, pagesCount){
+        super(author, name, releaseDate, pagesCount);
+        this.type = "detective";
+    }
+}
+
+class Library{
+    constructor(name){
+        this.name = name;
+        this.books = [];
+    }
+    addBook(book){
+        if(book.state > 30){
+            this.books.push(book);
+        }
+    }
+    findBookBy(type, value){
+        for(let i=0; i<this.books.length; i++){
+            if(this.books[i][type] === value){
+                return this.books[i];
+            }
+        }
+        return null;
+    }
+    giveBookByName(bookName){
+        for(let i=0; i<this.books.length; i++){
+            if(this.books[i].name === bookName){
+                let book = this.books[i];
+                this.books.splice(i, 1);
+                return book;
+            }
+        }
+        return null;
+    }
+}
+
+const sherlock = new PrintEditionItem(
+    "Полное собрание повестей и рассказов о Шерлоке Холмсе в одном томе",
+    2019,
+    1008
+   );
+   
+   console.log(sherlock.releaseDate); //2019
+   console.log(sherlock.state); //100
+   sherlock.fix();
+   console.log(sherlock.state); //100
