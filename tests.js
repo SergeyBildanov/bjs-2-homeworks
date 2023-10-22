@@ -1,116 +1,85 @@
-describe('Домашнее задание к лекции 5 «Классы»', () => {
-
-  describe('Задача №1', () => {
-    let printItem;
-
-    beforeEach(function(){
-      printItem = new PrintEditionItem('Типовой школьный журнал', 2019, 102);
-    });
-
-    it('создание печатного издания', () => {
-      expect(printItem).toBeDefined();
-      expect(printItem.name).toEqual('Типовой школьный журнал');
-      expect(printItem.releaseDate).toEqual(2019);
-      expect(printItem.pagesCount).toEqual(102);
-      expect(printItem.state).toEqual(100);
-      expect(printItem.type).toEqual(null);
-    });
-
-    it('починка почти целого печатного издания (ограничение сеттером state)', () => {
-      printItem.state = 90;
-      printItem.fix();
-      expect(printItem.state).toEqual(100);
-    });
-
-    it('починка печатного издания', () => {
-      printItem.state = 50;
-      printItem.fix();
-      expect(printItem.state).toEqual(75);
-    });
-
-    it('геттер для свойства state', () => {
-      printItem.state = 10;
-      const spy = spyOnProperty(printItem, 'state', 'get').and.returnValue(10);
-      expect(printItem.state).toBe(10);
-      expect(spy).toHaveBeenCalled();
-    });
-    
-    it('сеттер для свойства state', () => {
-      const spy = spyOnProperty(printItem, 'state', 'set');
-      printItem.state = 10;
-      expect(spy).toHaveBeenCalled();
-    });
-
-    it('создание объекта Magazine', () => {
-      printItem = new Magazine('Forbes', 2020, 180);
-      expect(printItem.type).toEqual("magazine");
-    });
-    
-    it('создание объекта Book', () => {
-      printItem = new Book('А. Сапковский', 'Меч Предназначения', 1992, 384);
-      expect(printItem.author).toEqual('А. Сапковский');
-      expect(printItem.name).toEqual('Меч Предназначения');
-      expect(printItem.releaseDate).toEqual(1992);
-      expect(printItem.pagesCount).toEqual(384);
-      expect(printItem.type).toEqual('book');
-    });
-
-    it('создание объекта NovelBook', () => {
-      printItem = new NovelBook('А. Сапковский', 'Меч Предназначения', 1992, 384);
-      expect(printItem.author).toEqual('А. Сапковский');
-      expect(printItem.type).toEqual('novel');
-    });
-    
-    it('создание объекта FantasticBook', () => {
-      printItem = new FantasticBook('Джон Толкин', 'Властелин колец', 1954, 2093);
-      expect(printItem.author).toEqual('Джон Толкин');
-      expect(printItem.type).toEqual('fantastic');
-    });
-    
-    it('создание объекта DetectiveBook', () => {
-      printItem = new DetectiveBook('Агата Кристи', 'Десять негритят', 2019, 256);
-      expect(printItem.author).toEqual('Агата Кристи');
-      expect(printItem.type).toEqual('detective');
-    });
-  });
-
-  describe('Задача №2', () => {
-    let library, printItem;
+describe('Домашнее задание к лекции «Обработка исключений и замыкания»', () => {
+    describe('Задача №1', () => {
+      it('функция parseCount должна парсить целое значение', () => {
+        expect(parseCount("123")).toEqual(123);
+      });
   
-    beforeEach(function(){
-      library = new Library('Библиотека имени Ленина');
-      printItem = new PrintEditionItem('Типовой школьный журнал', 2019, 102);
+      it('функция parseCount должна парсить значение 012', () => {
+        expect(parseCount("012")).toEqual(12);
+      });
+  
+      it('функция validateCount должна парсить дробное значение', () => {
+        expect(validateCount("56.65")).toEqual(56.65);
+      });
+
+      it('функция parseCount не должна парсить невалидное значение', () => {
+        expect(() => parseCount("ыфва")).toThrowError("Невалидное значение");
     });
 
-    it('создание библиотеки', () => {
-      expect(library).toBeDefined();
-      expect(library.name).toEqual('Библиотека имени Ленина');
-      expect(library.books).toEqual(jasmine.any(Array));
+      it('функция validateCount должна возвращать перехваченную ошибку', () => {
+        expect(validateCount("ыфва").stack.includes("parseCount")).toBeTruthy();
+      });
     });
-    
-    it('добавление книги', () => {
-      library.addBook(printItem);
-      expect(library.books[0].name).toEqual('Типовой школьный журнал');
-      expect(library.books.length).toEqual(1);
-    });
-    
-    it('поиск книги', () => {
-      const printItemAdditional = new PrintEditionItem('Блокнот для заметок', 2021, 100);
-      library.addBook(printItemAdditional);
-      library.addBook(printItem);
-      const firstBook = library.findBookBy("releaseDate", 2019);
-      expect(firstBook.name).toEqual('Типовой школьный журнал');
-      const secondBook = library.findBookBy("releaseDate", 2154);
-      expect(secondBook).toEqual(null);
-    });
-    
-    it('выдача книги', () => {
-      library.addBook(printItem);
-      const firstBook = library.giveBookByName('Типовой школьный журнал');
-      expect(firstBook.name).toEqual('Типовой школьный журнал');
-      expect(library.books.length).toEqual(0);
-      const secondBook = library.giveBookByName('Судовой журнал');
-      expect(secondBook).toEqual(null);
-    });
-  })
+
+    describe('Задача №2', () => {
+      it('объект Triangle должен создаваться', () => {
+        expect(new Triangle(1,3,3)).toBeDefined();
+      });
+  
+      it('объект Triangle должен создаваться и правильно считаться периметр и прощадь №1', () => {
+        const triangle = new Triangle(2,5,5);
+        expect(triangle).toBeDefined();
+        expect(triangle.perimeter).toEqual(12);
+        expect(triangle.area).toEqual(4.899);
+      });
+  
+      it('объект Triangle должен создаваться и правильно считаться периметр и прощадь №2', () => {
+        const triangle = new Triangle(6,10,15);
+        expect(triangle).toBeDefined();
+        expect(triangle.perimeter).toEqual(31);
+        expect(triangle.area).toEqual(20.123);
+      });
+
+      it('объект Triangle не должен менять свойства периметра и площади', () => {
+        const triangle = new Triangle(6,10,15);
+        expect(triangle).toBeDefined();
+
+        triangle.perimeter = "неправильное значение";
+        triangle.area = "неправильное значение";
+        expect(triangle.perimeter).toEqual(31);
+        expect(triangle.area).toEqual(20.123);
+      });
+  
+      it('объект Triangle не должен создаваться №1', () => {
+        expect(() => new Triangle(1,3,100)).toThrowError("Треугольник с такими сторонами не существует");
+      });
+  
+      it('объект Triangle не должен создаваться №2', () => {
+        expect(() => new Triangle(100,3,10)).toThrowError("Треугольник с такими сторонами не существует");
+      });
+  
+      it('объект Triangle не должен создаваться №3', () => {
+        expect(() => new Triangle(1,300,10)).toThrowError("Треугольник с такими сторонами не существует");
+      });
+  
+      it('функция getTriangle должна возвращать объект треугольника', () => {
+        expect(getTriangle(2,5,5)).toEqual(new Triangle(2,5,5));
+      });
+  
+      it('функция getTriangle не должна возвращать объект треугольника', () => {
+        const triangle = getTriangle(1,3,100);
+        expect(triangle.area).toEqual('Ошибка! Треугольник не существует');
+        expect(triangle.perimeter).toEqual('Ошибка! Треугольник не существует');
+      });
+
+      it('у возвращаемого объекта нельзя менять свойства получения периметра и площади', () => {
+        const triangle = getTriangle(1,3,100);
+
+        triangle.perimeter = "неправильное значение";
+        triangle.area = "неправильное значение";
+        expect(triangle.area).toEqual('Ошибка! Треугольник не существует');
+        expect(triangle.perimeter).toEqual('Ошибка! Треугольник не существует');
+      });
+    })
+
 });
