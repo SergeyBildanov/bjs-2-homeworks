@@ -1,85 +1,137 @@
-describe('Домашнее задание к лекции «Обработка исключений и замыкания»', () => {
-    describe('Задача №1', () => {
-      it('функция parseCount должна парсить целое значение', () => {
-        expect(parseCount("123")).toEqual(123);
-      });
-  
-      it('функция parseCount должна парсить значение 012', () => {
-        expect(parseCount("012")).toEqual(12);
-      });
-  
-      it('функция validateCount должна парсить дробное значение', () => {
-        expect(validateCount("56.65")).toEqual(56.65);
-      });
+describe('Домашнее задание к лекции 7 «Асинхронность»', () => {
+  let clock;
 
-      it('функция parseCount не должна парсить невалидное значение', () => {
-        expect(() => parseCount("ыфва")).toThrowError("Невалидное значение");
-    });
+  beforeEach(function(){
+    clock = new AlarmClock();
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 2000;
+  })
 
-      it('функция validateCount должна возвращать перехваченную ошибку', () => {
-        expect(validateCount("ыфва").stack.includes("parseCount")).toBeTruthy();
-      });
-    });
+  it('необходимо создавать объект будильник', () => {
+    expect(clock).toBeTruthy();
+  });
 
-    describe('Задача №2', () => {
-      it('объект Triangle должен создаваться', () => {
-        expect(new Triangle(1,3,3)).toBeDefined();
-      });
-  
-      it('объект Triangle должен создаваться и правильно считаться периметр и прощадь №1', () => {
-        const triangle = new Triangle(2,5,5);
-        expect(triangle).toBeDefined();
-        expect(triangle.perimeter).toEqual(12);
-        expect(triangle.area).toEqual(4.899);
-      });
-  
-      it('объект Triangle должен создаваться и правильно считаться периметр и прощадь №2', () => {
-        const triangle = new Triangle(6,10,15);
-        expect(triangle).toBeDefined();
-        expect(triangle.perimeter).toEqual(31);
-        expect(triangle.area).toEqual(20.123);
-      });
+  it('необходимо создавать добавлять звонок', () => {
+    const callback = f => f;
+    clock.addClock("16:45", callback);
+    expect(clock.alarmCollection.length).toEqual(1);
+    expect(clock.alarmCollection[0].canCall).toBe(true);
+    expect(clock.alarmCollection[0].time).toBe("16:45");
+    expect(clock.alarmCollection[0].callback).toBe(callback);
+  });
 
-      it('объект Triangle не должен менять свойства периметра и площади', () => {
-        const triangle = new Triangle(6,10,15);
-        expect(triangle).toBeDefined();
+  it('id интервала должно отсутствовать до запуска', () => {
+    expect(clock.intervalId).toBeNull();
+  });
 
-        triangle.perimeter = "неправильное значение";
-        triangle.area = "неправильное значение";
-        expect(triangle.perimeter).toEqual(31);
-        expect(triangle.area).toEqual(20.123);
-      });
-  
-      it('объект Triangle не должен создаваться №1', () => {
-        expect(() => new Triangle(1,3,100)).toThrowError("Треугольник с такими сторонами не существует");
-      });
-  
-      it('объект Triangle не должен создаваться №2', () => {
-        expect(() => new Triangle(100,3,10)).toThrowError("Треугольник с такими сторонами не существует");
-      });
-  
-      it('объект Triangle не должен создаваться №3', () => {
-        expect(() => new Triangle(1,300,10)).toThrowError("Треугольник с такими сторонами не существует");
-      });
-  
-      it('функция getTriangle должна возвращать объект треугольника', () => {
-        expect(getTriangle(2,5,5)).toEqual(new Triangle(2,5,5));
-      });
-  
-      it('функция getTriangle не должна возвращать объект треугольника', () => {
-        const triangle = getTriangle(1,3,100);
-        expect(triangle.area).toEqual('Ошибка! Треугольник не существует');
-        expect(triangle.perimeter).toEqual('Ошибка! Треугольник не существует');
-      });
+  it('необходимо запускать и останавливать будильник', () => {
+    clock.addClock("16:45", f => f);
+    clock.start();
+    expect(clock.intervalId).toBeDefined();
+    clock.stop();
+  });
 
-      it('у возвращаемого объекта нельзя менять свойства получения периметра и площади', () => {
-        const triangle = getTriangle(1,3,100);
+  it('будильник должен возвращать время в формате HH:MM', () => {
+    expect(clock.getCurrentFormattedTime()).toEqual(new Date().toLocaleTimeString("ru-Ru", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }));
+  });
 
-        triangle.perimeter = "неправильное значение";
-        triangle.area = "неправильное значение";
-        expect(triangle.area).toEqual('Ошибка! Треугольник не существует');
-        expect(triangle.perimeter).toEqual('Ошибка! Треугольник не существует');
-      });
-    })
+  it('будильник должен создавать интервал, а затем его удалять', () => {
+    clock.start();
+    expect(clock.intervalId).toBeDefined();
+    clock.stop();
+    expect(clock.intervalId).toBeNull();
+  });
 
+  it('будильник должен удалять звонки и интервал при очистке звонков', () => {
+    const callback = f => f;
+    clock.addClock("16:45", callback);
+    expect(clock.alarmCollection.length).toEqual(1);
+    clock.start();
+    expect(clock.intervalId).toBeDefined();
+    clock.clearAlarms();
+    expect(clock.intervalId).toBeNull();
+    expect(clock.alarmCollection.length).toEqual(0);
+  });
+
+  it('будильник не должен несколько интервалов', () => {
+    clock.start();
+    const intervalId = clock.intervalId;
+    clock.start();
+    expect(intervalId).toEqual(clock.intervalId);
+  });
+
+  it('будильник должен удалять звонки по времени', () => {
+    const callback = f => f;
+    clock.addClock("16:45", callback);
+    clock.addClock("16:45", callback);
+    clock.addClock("16:46", callback);
+    clock.removeClock("16:45");
+    expect(clock.alarmCollection.length).toEqual(1);
+    expect(clock.alarmCollection).toEqual([{time: "16:46", callback, canCall: true}]);
+  });
+
+  it('будильник не должен удалять звонки отсутствующему времени', () => {
+    const callback = f => f;
+
+    clock.addClock("16:46", callback);
+    clock.removeClock("17:00");
+    expect(clock.alarmCollection.length).toEqual(1);
+    expect(clock.alarmCollection).toEqual([{time: "16:46", callback, canCall: true}]);
+  });
+
+  it('будильник должен затем очищать все звонки', () => {
+    clock.addClock("16:45", f => f);
+    clock.addClock("16:45", f => f);
+    clock.addClock("16:45", f => f);
+    expect(clock.alarmCollection.length).toEqual(3);
+
+    clock.clearAlarms();
+    expect(clock.alarmCollection.length).toEqual(0);
+  });
+
+  it('будильник должен выбрасывать объект ошибки, если время не было передано', () => {
+    expect(() => clock.addClock(null, f => f)).toThrow();
+  });
+
+  it('будильник должен выбрасывать объект ошибки, если колбек не был передан', () => {
+    expect(() => clock.addClock("16:45")).toThrow();
+  });
+
+  it('будильник должен восстанавливать возможность запуска звонков', () => {
+    clock.addClock("16:45", f => f);
+    clock.addClock("16:45", f => f);
+    clock.addClock("16:45", f => f);
+    
+    expect(clock.alarmCollection.every(alarm => alarm.canCall)).toBe(true);
+    clock.alarmCollection.forEach(alarm => alarm.canCall = false);
+    expect(clock.alarmCollection.every(alarm => alarm.canCall)).toBe(false);
+    clock.resetAllCalls();
+    expect(clock.alarmCollection.every(alarm => alarm.canCall)).toBe(true);
+  });
+
+  it('будильник должен запускать интервал, который не запустит колбек', (done) => {
+    clock.addClock("16:45", f => f);
+    clock.getCurrentFormattedTime = () => "17:00";
+    clock.start();
+
+    setTimeout(() => {
+      expect(clock.alarmCollection[0].canCall).toBe(true);
+      done();
+    }, 1000);
+  });
+
+  it('будильник должен запускать интервал, который запустит колбек', (done) => {
+    let flagToCall = false;
+    clock.addClock("16:45", () => flagToCall = true);
+    clock.getCurrentFormattedTime = () => "16:45";
+    clock.start();
+
+    setTimeout(() => {
+      expect(clock.alarmCollection[0].canCall).toBe(false);
+      expect(flagToCall).toBe(true);
+      done();
+    }, 1000);
+  });
 });

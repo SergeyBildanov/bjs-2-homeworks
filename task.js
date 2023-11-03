@@ -1,57 +1,55 @@
-﻿function parseCount(value){
-    if(isNaN(Number.parseFloat(value))){
-        throw new Error("Невалидное значение");
+const validHHMMstring = (str) => /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(str);
+class AlarmClock{
+    constructor(){
+        this.alarmCollection = [];
+        this.intervalId = null;
     }
-    return Number.parseFloat(value);
-}
-function validateCount(value){
-    try{
-        return parseCount(value);
-    } catch(error){
-        return error;
-    } 
-}
-
-class Triangle{
-    constructor(a,b,c){
-        if((a+b)<c || (b+c)<a || (a+c)<b){
-            throw new Error("Треугольник с такими сторонами не существует");
+    addClock(time, callback){
+        if(!(validHHMMstring(time)) || callback === undefined){
+            throw new Error('Отсутствуют обязательные аргументы');
         }
-        this.firstSide = a;
-        this.secondSide = b;
-        this.thirsSide = c;
-        this._perimeter = a + b + c;
-        this._area = Number(Math.sqrt((this._perimeter/2)*((this._perimeter/2)-a)*((this._perimeter/2)-b)*((this._perimeter/2)-c)).toFixed(3));
-    }
-    get perimeter(){
-        let a = this.firstSide;
-        let b = this.secondSide;
-        let c = this.thirsSide;
-        if((a+b)<c || (b+c)<a || (a+c)<b){
-            throw new Error("Ошибка! Треугольник не существует!");
+        for(let i=0; i<this.alarmCollection.length; i++){
+            if(this.alarmCollection[i].time === time){
+                console.warn('Уже присутствует звонок на это же время');
+            }
         }
-        return this._perimeter;
+        let alarmObject = {};
+        alarmObject.callback = callback;
+        alarmObject.time = time;
+        alarmObject.canCall = true;
+        this.alarmCollection.push(alarmObject)
     }
-    get area(){
-        let a = this.firstSide;
-        let b = this.secondSide;
-        let c = this.thirsSide;
-        if((a+b)<c || (b+c)<a || (a+c)<b){
-            throw new Error("Ошибка! Треугольник не существует!");
+    removeClock(time){
+        this.alarmCollection = this.alarmCollection.filter((alarm) => alarm.time !== time);
+    }
+    getCurrentFormattedTime(){
+        let date = new Date();
+        return `${date.getHours()}:${date.getMinutes()}`;
+    }
+    start(){
+        if(this.intervalId){
+            return 0;
         }
-        return this._area;
+        this.intervalId = setInterval(() => {
+            this.alarmCollection.forEach(element => {
+                if((element.time === this.getCurrentFormattedTime()) && element.canCall === true){
+                    element.canCall = false;
+                    element.callback();
+                }
+            });
+        }, 1000);
     }
-}
-
-function getTriangle(a, b, c){
-    try{
-        return new Triangle(a, b, c);
-    } catch(error){
-        const triangle = {
-          perimeter: "Ошибка! Треугольник не существует",
-          area: "Ошибка! Треугольник не существует"   
-        };
-        Object.freeze(triangle);
-        return triangle; 
+    stop(){
+        clearInterval(this.intervalId);
+        this.intervalId = null;
+    }
+    resetAllCalls(){
+        this.alarmCollection.forEach(element => {
+                element.canCall = true;
+        });
+    }
+    clearAlarms(){
+        this.stop();
+        this.alarmCollection = [];
     }
 }
