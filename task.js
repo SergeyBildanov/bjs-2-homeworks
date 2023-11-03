@@ -24,7 +24,9 @@ class AlarmClock{
     }
     getCurrentFormattedTime(){
         let date = new Date();
-        return `${date.getHours()}:${date.getMinutes()}`;
+        let now = date.toLocaleTimeString();
+        now = now.slice(0, now.length - 3)
+        return now;
     }
     start(){
         if(this.intervalId){
